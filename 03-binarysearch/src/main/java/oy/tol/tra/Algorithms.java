@@ -1,7 +1,7 @@
 package oy.tol.tra;
 
 public class Algorithms {
-    // 冒泡排序
+  
     public static <T extends Comparable<T>> void sort(T[] array) {
         boolean swapped = false;
         for (int i = 0; i < array.length - 1; i++) {
@@ -18,8 +18,7 @@ public class Algorithms {
             }
         }
     }
-
-    // 选择排序
+  
     public static <T> void reverse(T[] array) {
         int start = 0;
         int end = array.length - 1;
@@ -32,7 +31,6 @@ public class Algorithms {
         }
     }
 
-    // 插入排序
     public static <T extends Comparable<T>> int binarySearch(T aValue, T[] fromArray, int fromIndex, int toIndex) {
         while (fromIndex <= toIndex) {
             int mid = fromIndex + (toIndex - fromIndex) / 2;
@@ -48,9 +46,8 @@ public class Algorithms {
         return -1;
     }
 
-    // 快速排序
-    public static <E extends Comparable<E>> void fastSort(E[] array, int start, int end) {
-        quickSort(array, start, end);
+    public static <E extends Comparable<E>> void fastSort(E[] array) {
+        quickSort(array, 0, array.length - 1);
     }
 
     private static <E extends Comparable<E>> void quickSort(E[] array, int start, int end) {
