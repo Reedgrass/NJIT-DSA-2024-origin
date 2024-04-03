@@ -1,7 +1,5 @@
 package oy.tol.tra;
 
-import java.util.EmptyStackException;
-
 public class StackImplementation<E> implements StackInterface<E> {
    private Object[] itemArray;
    private int capacity;
@@ -16,12 +14,8 @@ public class StackImplementation<E> implements StackInterface<E> {
       if (capacity < 2) {
          throw new StackAllocationException("Capacity must be at least 2.");
       }
-      try {
-         itemArray = new Object[capacity];
-         this.capacity = capacity;
-      } catch (Exception e) {
-         throw new StackAllocationException("Failed to allocate room for the internal array.");
-      }
+      this.capacity = capacity;
+      this.itemArray = new Object[capacity];
    }
 
    @Override
@@ -31,39 +25,23 @@ public class StackImplementation<E> implements StackInterface<E> {
 
    @Override
    public void push(E element) throws StackAllocationException, NullPointerException {
+      checkAndGrow();
       if (element == null) {
-         throw new NullPointerException("Cannot push null element to stack.");
+         throw new NullPointerException("Element cannot be null.");
       }
-      if (currentIndex == capacity - 1) {
-         // Reallocate array to double its current capacity
-         capacity *= 2;
-         Object[] newArray = new Object[capacity];
-         System.arraycopy(itemArray, 0, newArray, 0, currentIndex + 1);
-         itemArray = newArray;
-      }
-      currentIndex++;
-      itemArray[currentIndex] = element;
+
+      itemArray[++currentIndex] = element; // 先增加currentIndex，然后添加元素
    }
 
    @SuppressWarnings("unchecked")
    @Override
    public E pop() throws StackIsEmptyException {
       if (isEmpty()) {
-         throw new StackIsEmptyException("Stack is empty, cannot pop.");
+         throw new StackIsEmptyException("Stack is empty.");
       }
       E element = (E) itemArray[currentIndex];
-      itemArray[currentIndex] = null; // Dereference to aid garbage collection
-      currentIndex--;
+      itemArray[currentIndex--] = null; // 移除元素，并减少currentIndex
       return element;
-   }
-
-   @SuppressWarnings("unchecked")
-   @Override
-   public E peek() throws StackIsEmptyException {
-      if (isEmpty()) {
-         throw new StackIsEmptyException("Stack is empty, cannot peek.");
-      }
-      return (E) itemArray[currentIndex];
    }
 
    @Override
@@ -71,46 +49,39 @@ public class StackImplementation<E> implements StackInterface<E> {
       return currentIndex + 1;
    }
 
+   @SuppressWarnings("unchecked")
+   @Override
+   public E peek() throws StackIsEmptyException {
+      if (isEmpty()) {
+         throw new StackIsEmptyException("Stack is empty.");
+      }
+      return (E) itemArray[currentIndex];
+   }
+
    @Override
    public void clear() {
-      itemArray = new Object[DEFAULT_STACK_SIZE];
-      capacity = DEFAULT_STACK_SIZE;
+
       currentIndex = -1;
    }
 
    @Override
    public boolean isEmpty() {
-      return currentIndex == -1;
+      return currentIndex < 0;
    }
 
-   @Override
-   public String toString() {
-      StringBuilder builder = new StringBuilder("[");
-      for (int index = 0; index <= currentIndex; index++) {
-         builder.append(itemArray[index]);
-         if (index < currentIndex) {
-            builder.append(", ");
-         }
+   private void checkAndGrow() {
+      if (currentIndex + 1 == capacity) {
+         int newCapacity = capacity + (capacity >> 1);
+         Object[] newArray = new Object[newCapacity];
+         System.arraycopy(itemArray, 0, newArray, 0, capacity);
+         itemArray = newArray;
+         capacity = newCapacity;
       }
-      builder.append("]");
-      return builder.toString();
-   }
-}
-
-   @Override
-   public void clear() {
-      // TODO: Implement this
-      
-   }
-
-   @Override
-   public boolean isEmpty() {
-      // TODO: Implement this
-      
    }
 
    @Override
    public String toString() {
+
       StringBuilder builder = new StringBuilder("[");
       for (var index = 0; index <= currentIndex; index++) {
          builder.append(itemArray[index].toString());
