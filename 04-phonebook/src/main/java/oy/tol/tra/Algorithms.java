@@ -1,96 +1,110 @@
 package oy.tol.tra;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.function.Predicate;
 
 public class Algorithms {
+    public static <T> void swap(T[] array, int index1, int index2) {
+        T tmp = array[index1];
+        array[index1] = array[index2];
+        array[index2] = tmp;
+    }
 
-    // Implementation of the quicksort algorithm
-    public static <T extends Comparable<T>> void fastSort(T[] array) {
-        if (array == null || array.length == 0) {
+    // BubbleSort
+    public static <T extends Comparable<T>> void sort(T[] array) {
+        for (int i = 0; i < array.length - 1; i++) {
+            for (int j = 0; j < array.length - i - 1; j++) {
+                if (array[j].compareTo(array[j + 1]) > 0) {
+                    swap(array, j, j + 1);
+                }
+            }
+        }
+    }
+
+    public static <T> void reverse(T[] array) {
+        int left = 0;
+        int right = array.length - 1;
+        while (left < right) {
+            swap(array, left, right);
+            left++;
+            right--;
+        }
+    }
+
+    public static <T extends Comparable<T>> int binarySearch(T aValue, T[] fromArray, int fromIndex, int toIndex) {
+        int mid;
+        while (fromIndex <= toIndex) {
+            mid = fromIndex + (toIndex - fromIndex) / 2;
+            if (aValue.compareTo(fromArray[mid]) > 0) {
+                fromIndex = mid + 1;
+            } else if (aValue.compareTo(fromArray[mid]) < 0) {
+                toIndex = mid - 1;
+            } else {
+                return mid;
+            }
+        }
+        return -1;
+    }
+
+    // QuickSort
+    public static <E extends Comparable<E>> void fastSort(E[] array) {
+        quickSort(array, 0, array.length - 1);
+    }
+
+    public static <E extends Comparable<E>> void quickSort(E[] array, int begin, int end) {
+        if (begin >= end) {
             return;
         }
-        fastSort(array, 0, array.length - 1);
+        int pivot = partition(array, begin, end);
+        quickSort(array, begin, pivot - 1);
+        quickSort(array, pivot + 1, end);
     }
 
-    private static <T extends Comparable<T>> void fastSort(T[] array, int left, int right) {
-        if (left < right) {
-            int pivotIndex = partition(array, left, right);
-            fastSort(array, left, pivotIndex - 1);
-            fastSort(array, pivotIndex + 1, right);
-        }
-    }
-
-    private static <T extends Comparable<T>> int partition(T[] array, int left, int right) {
-        T pivot = array[right];
-        int i = left - 1;
-        for (int j = left; j < right; j++) {
-            if (array[j].compareTo(pivot) <= 0) {
-                i++;
-                swap(array, i, j);
-            }
-        }
-        swap(array, i + 1, right);
-        return i + 1;
-    }
-
-    private static <T> void swap(T[] array, int i, int j) {
-        T temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-
-    // Implementation of partitionByRule method
-    public static <T> int partitionByRule(T[] array, int length, PartitionRule<T> rule) {
-        int left = 0;
-        int right = length - 1;
-        while (left <= right) {
-            // Find the first element that does not satisfy the rule from the left side
-            while (left <= right && rule.test(array[left])) {
-                left++;
-            }
-            // Find the first element that satisfies the rule from the right side
-            while (left <= right && !rule.test(array[right])) {
+    private static <E extends Comparable<E>> int partition(E[] array, int begin, int end) {
+        E p = array[begin];
+        int left = begin;
+        int right = end;
+        while (left != right) {
+            while ((left < right) && array[right].compareTo(p) > 0) {
                 right--;
             }
-            // Swap the elements if they are in the wrong order
-            if (left <= right) {
+            while ((left < right) && array[left].compareTo(p) <= 0) {
+                left++;
+            }
+            if (left < right) {
                 swap(array, left, right);
-                left++;
-                right--;
             }
         }
-        // Return the index where the partition occurs
+        array[begin] = array[left];
+        array[left] = p;
         return left;
     }
 
-    // Implementation of sortWithComparator method
-    public static <T> void sortWithComparator(T[] array, Comparator<T> comparator) {
-        fastSortWithComparator(array, comparator, 0, array.length - 1);
-    }
+    public static <T> int partitionByRule(T[] pairs, int count, Predicate<T> judgeNullPredicate) {
+        int left = 0;
+        int right = count - 1;
 
-    private static <T> void fastSortWithComparator(T[] array, Comparator<T> comparator, int left, int right) {
-        if (left < right) {
-            int pivotIndex = partitionWithComparator(array, comparator, left, right);
-            fastSortWithComparator(array, comparator, left, pivotIndex - 1);
-            fastSortWithComparator(array, comparator, pivotIndex + 1, right);
-        }
-    }
+        while (left <= right) {
+            while (left <= right && !judgeNullPredicate.test(pairs[left])) {
+                left++;
+            }
 
-    private static <T> int partitionWithComparator(T[] array, Comparator<T> comparator, int left, int right) {
-        T pivot = array[right];
-        int i = left - 1;
-        for (int j = left; j < right; j++) {
-            if (comparator.compare(array[j], pivot) <= 0) {
-                i++;
-                swap(array, i, j);
+            while (left <= right && judgeNullPredicate.test(pairs[right])) {
+                right--;
+            }
+
+            if (left < right) {
+                swap(pairs, left, right);
+                left++;
+                right--;
             }
         }
-        swap(array, i + 1, right);
-        return i + 1;
+        return left;
+
     }
 
-    // Functional interface for defining partition rule
-    public interface PartitionRule<T> {
-        boolean test(T element);
+    public static <T> void sortWithComparator(T[] array, Comparator<? super T> comparator) {
+        Arrays.sort(array, comparator);
     }
 }
